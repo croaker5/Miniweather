@@ -22,6 +22,21 @@ public class MyApplication extends Application{
 
     private static MyApplication mApplication;
     private CityDB mCityDB;
+
+
+
+    public static MyApplication getmApplication() {
+        return mApplication;
+    }
+
+    public CityDB getmCityDB() {
+        return mCityDB;
+    }
+
+    public List<City> getmCityList() {
+        return mCityList;
+    }
+
     private List<City> mCityList;
     @Override
     public void onCreate(){

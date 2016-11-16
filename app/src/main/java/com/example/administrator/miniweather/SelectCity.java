@@ -4,13 +4,26 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import com.example.administrator.miniweather.app.MyApplication;
+import com.example.administrator.miniweather.bean.City;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Created by Andrew on 2016/10/18.
@@ -23,6 +36,7 @@ public class SelectCity extends Activity implements View.OnClickListener {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private String selectedID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +47,30 @@ public class SelectCity extends Activity implements View.OnClickListener {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        MyApplication mapplicatio1 = (MyApplication) getApplication();
+        List <String> data = new ArrayList<>();
+        final List <String> cityID = new ArrayList<>();
+        Iterator <City> it = mapplicatio1.getmCityList().iterator();
+        while(it.hasNext())
+        {
+            City tmp = it.next();
+            String cityname1 = tmp.getCity();
+            String cityid1 = tmp.getNumber();
+            data.add(cityname1);
+            cityID.add(cityid1);
+        }
+        ListView mlistView = (ListView) findViewById(R.id.list_view);
+        ArrayAdapter <String> adapter2 = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1
+        ,data);
+        mlistView.setAdapter(adapter2);
+        mlistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(SelectCity.this, "你单击了:"+i, Toast.LENGTH_SHORT).show();
+                selectedID = cityID.get(i);
+
+            }
+        });
     }
 
     @Override
@@ -40,7 +78,7 @@ public class SelectCity extends Activity implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.title_back:
                 Intent i = new Intent();
-                i.putExtra("cityCode", "101160101");
+                i.putExtra("cityCode", selectedID);
                 setResult(RESULT_OK, i);
                 finish();
             default:
