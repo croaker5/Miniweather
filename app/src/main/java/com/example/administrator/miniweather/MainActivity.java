@@ -2,14 +2,25 @@ package com.example.administrator.miniweather;
 
 import android.app.Activity;
 import android.app.Notification;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +49,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ImageView mCitySelect;
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
+
+
+    private IntentFilter intentFilter;
+    private MyBroadcastReceiver myBroadcastReceiver;
+
+    private String citycodeformain = "101010100";
+
+
+
+
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
@@ -49,6 +70,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
         }
     };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +90,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mCitySelect = (ImageView)findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
         initView();
+        Intent ServiceIntent = new Intent(this,MyService.class);
+        startService(ServiceIntent);
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("updatedata");
+        myBroadcastReceiver = new MyBroadcastReceiver();
+        registerReceiver(myBroadcastReceiver,intentFilter);
+
+
+    }
+    @Override
+    protected void onDestroy (){
+        super.onDestroy();
+
     }
 
     void initView() {
+
         city_name_Tv = (TextView) findViewById(R.id.title_city_name);
         cityTv = (TextView) findViewById(R.id.city);
         timeTv = (TextView) findViewById(R.id.time);
@@ -98,17 +135,21 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+
         if(view.getId()==R.id.title_city_manager){
             Intent i = new Intent(this,SelectCity.class);
             startActivityForResult(i,1);
         }
         if (view.getId() == R.id.title_update_btn) {
+
+
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
-            String cityCode = sharedPreferences.getString("main_city_code", "101160101");
+            String cityCode = sharedPreferences.getString("main_city_code", citycodeformain);
             Log.d("myWeather", cityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
                 queryWeatherCode(cityCode);
+
             } else {
                 Log.d("myWeather", "网络挂了");
                 Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
@@ -119,6 +160,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String newCityCode= data.getStringExtra("cityCode");
+            citycodeformain = new String(newCityCode);
             Log.d("myWeather", "选择的城市代码为"+newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
@@ -131,6 +173,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void queryWeatherCode(String cityCode) {
+        Animation operatingAnim = AnimationUtils.loadAnimation(this, R.anim.tip);
+        LinearInterpolator lin = new LinearInterpolator();
+        operatingAnim.setInterpolator(lin);
+        if (operatingAnim != null) {
+            mUpdateBtn.startAnimation(operatingAnim);
+        }
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
         Log.d("myWeather", address);
         new Thread(new Runnable() {
@@ -160,6 +208,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         Message msg =new Message();
                         msg.what = UPDATE_TODAY_WEATHER;
                         msg.obj=todayWeather;
+                        Thread.sleep(2000);
+
                         mHandler.sendMessage(msg);
                     }
                 } catch (Exception e) {
@@ -183,7 +233,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         temperatureTv.setText(todayWeather.getHigh()+"~"+todayWeather.getLow());
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:"+todayWeather.getFengli());
+        mUpdateBtn.clearAnimation();
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
+
     }
     private TodayWeather parseXML(String xmldata) {
         TodayWeather todayWeather = null;
@@ -271,6 +323,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
             e.printStackTrace();
         }
         return todayWeather;
+    }
+    class MyBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive (Context context,Intent intent){
+            queryWeatherCode(citycodeformain);
+
+        }
     }
 }
 

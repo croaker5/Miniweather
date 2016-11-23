@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.miniweather.app.MyApplication;
@@ -31,12 +32,14 @@ import java.util.ListIterator;
 
 public class SelectCity extends Activity implements View.OnClickListener {
     private ImageView mBackBtn;
+    private TextView CurrentTitle;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
     private String selectedID;
+    private String selectedCityname;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +50,10 @@ public class SelectCity extends Activity implements View.OnClickListener {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-        MyApplication mapplicatio1 = (MyApplication) getApplication();
-        List <String> data = new ArrayList<>();
+        MyApplication mapplication1 = (MyApplication) getApplication();
+        final List <String> data = new ArrayList<>();
         final List <String> cityID = new ArrayList<>();
-        Iterator <City> it = mapplicatio1.getmCityList().iterator();
+        Iterator <City> it = mapplication1.getmCityList().iterator();
         while(it.hasNext())
         {
             City tmp = it.next();
@@ -66,8 +69,13 @@ public class SelectCity extends Activity implements View.OnClickListener {
         mlistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(SelectCity.this, "你单击了:"+i, Toast.LENGTH_SHORT).show();
+               // Toast.makeText(SelectCity.this, "你单击了:"+i, Toast.LENGTH_SHORT).show();
                 selectedID = cityID.get(i);
+                selectedCityname = data.get(i);
+                CurrentTitle = (TextView)findViewById(R.id.title_name);
+                CurrentTitle.setText("当前城市："+selectedCityname);
+
+
 
             }
         });
