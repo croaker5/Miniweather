@@ -1,6 +1,7 @@
 package com.example.administrator.miniweather;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -56,12 +57,12 @@ import com.baidu.location.Poi;
 public class MainActivity extends Activity implements View.OnClickListener , ViewPager.OnPageChangeListener{
     private static final int UPDATE_TODAY_WEATHER = 1;
     private ImageView mUpdateBtn;
-    private ImageView mCitySelect,mLocationBtn;
+    private ImageView mCitySelect,mLocationBtn,shareBtn;
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg,weekday1Img,weekday2Img,weekday3Img,weekday4Img;
 
     private TextView weekday1,weekday2,weekday3,weekday4,temperature1,temperature2,temperature3,temperature4,weather1,weather2,weather3,weather4,
-              fengli1,fengli2,fengli3,fengli4;
+              fengli1,fengli2,fengli3,fengli4,suggestions;
 
 
     private  View viewforname1,viewforname2;
@@ -83,6 +84,8 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
     public BDLocationListener myListener = new MyLocationListener();
 
     public BDLocation currentlocation;
+
+    private String chuanyizhishu;
 
 
 
@@ -213,6 +216,9 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         climateTv = (TextView) findViewById(R.id.climate);
         windTv = (TextView) findViewById(R.id.wind);
         weatherImg = (ImageView) findViewById(R.id.weather_img);
+        suggestions = (TextView) findViewById(R.id.title_suggestions);
+        shareBtn = (ImageView)findViewById(R.id.title_share);
+
 
         city_name_Tv.setText("N/A");
         cityTv.setText("N/A");
@@ -236,6 +242,8 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         vp2 = (ViewPager)findViewById(R.id.viewpagermain);
         vp2.setAdapter(vpAdapter2);
         vp2.setOnPageChangeListener(this);
+        suggestions.setOnClickListener(this);
+        shareBtn.setOnClickListener(this);
 
         weekday1 = (TextView)viewforname1.findViewById(R.id.day1);
         weekday2 = (TextView)viewforname1.findViewById(R.id.day2);
@@ -243,6 +251,8 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         weekday4 = (TextView)viewforname2.findViewById(R.id.day4);
 
         Log.d("1",(weekday1==null)+"12");
+
+        suggestions.setText("N/A");
 
         temperature1 = (TextView)viewforname1.findViewById(R.id.temperature1);
         temperature2 = (TextView)viewforname1.findViewById(R.id.temperature2);
@@ -323,6 +333,20 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
 
 
         }
+        if(view.getId() == R.id.title_suggestions){
+            AlertDialog.Builder builder  = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("生活建议" ) ;
+            builder.setMessage(chuanyizhishu) ;
+            builder.setPositiveButton("确定" ,  null );
+            builder.show();
+        }
+        if(view.getId() == R.id.title_share){
+            AndroidShare as = new AndroidShare(
+                    MainActivity.this,
+                    "哈哈---超方便的分享！！！来自allen",
+                    "http://img6.cache.netease.com/cnews/news2012/img/logo_news.png");
+            as.show();
+        }
 
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -402,6 +426,7 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         temperatureTv.setText(todayWeather.getHigh()+"~"+todayWeather.getLow());
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:"+todayWeather.getFengli());
+        suggestions.setText("生活建议");
         updateweatherpicture(weatherImg,todayWeather.getType());
 
         updateweatherpicture(weekday1Img,futureweathers[0].getWeather());
@@ -448,8 +473,9 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         int highCount = 0;
         int lowCount = 0;
         int typeCount = 0;
+        int detailcount = 0;
         futureweathers = new futureweather[] {new futureweather(),new futureweather(),new futureweather(),new futureweather()};
-        int flag = 0,i=0;
+        int i=0;
         try {
             XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
             XmlPullParser xmlPullParser = fac.newPullParser();
@@ -544,6 +570,13 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
                                 }else if (xmlPullParser.getName().equals("type") ) {
                                     eventType = xmlPullParser.next();
                                     typeCount++;
+                                }else if(xmlPullParser.getName().equals("detail")&& detailcount ==2){
+                                    eventType = xmlPullParser.next();
+                                    chuanyizhishu = xmlPullParser.getText();
+                                    Log.d("chuanyizhishu",chuanyizhishu);
+                                }else if (xmlPullParser.getName().equals("detail")){
+                                    eventType = xmlPullParser.next();
+                                    detailcount++;
                                 }
 // 判断当前事件是否为标签元素结束事件
                             }
