@@ -58,7 +58,7 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
     private ImageView mUpdateBtn;
     private ImageView mCitySelect,mLocationBtn;
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;
-    private ImageView weatherImg, pmImg;
+    private ImageView weatherImg, pmImg,weekday1Img,weekday2Img,weekday3Img,weekday4Img;
 
     private TextView weekday1,weekday2,weekday3,weekday4,temperature1,temperature2,temperature3,temperature4,weather1,weather2,weather3,weather4,
               fengli1,fengli2,fengli3,fengli4;
@@ -259,7 +259,12 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         fengli3 = (TextView)viewforname1.findViewById(R.id.fengli3);
         fengli4 = (TextView)viewforname2.findViewById(R.id.fengli4);
 
-       weekday1.setText("N/A");
+        weekday1Img = (ImageView)viewforname1.findViewById(R.id.daypic1);
+        weekday2Img = (ImageView)viewforname1.findViewById(R.id.daypic2);
+        weekday3Img = (ImageView)viewforname1.findViewById(R.id.daypic3);
+        weekday4Img = (ImageView)viewforname2.findViewById(R.id.daypic4);
+
+        weekday1.setText("N/A");
         weekday2.setText("N/A");
         weekday3.setText("N/A");
         weekday4.setText("N/A");
@@ -397,6 +402,15 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         temperatureTv.setText(todayWeather.getHigh()+"~"+todayWeather.getLow());
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:"+todayWeather.getFengli());
+        updateweatherpicture(weatherImg,todayWeather.getType());
+
+        updateweatherpicture(weekday1Img,futureweathers[0].getWeather());
+        updateweatherpicture(weekday2Img,futureweathers[1].getWeather());
+        updateweatherpicture(weekday3Img,futureweathers[2].getWeather());
+        updateweatherpicture(weekday4Img,futureweathers[3].getWeather());
+
+        updatepmpicture(pmImg,todayWeather.getPm25());
+
         weekday1.setText(futureweathers[0].getWeekday());
         weekday2.setText(futureweathers[1].getWeekday());
         weekday3.setText(futureweathers[2].getWeekday());
@@ -410,7 +424,7 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         temperature4.setText(futureweathers[3].getHigh()+"~"+futureweathers[3].getLow());
 
 
-        weather1.setText(futureweathers[0].getWeather());
+        weather1.setText(futureweathers[0].getWeather());//每天的天气
         weather2.setText(futureweathers[1].getWeather());
         weather3.setText(futureweathers[2].getWeather());
         weather4.setText(futureweathers[3].getWeather());
@@ -554,6 +568,79 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
             queryWeatherCode(citycodeformain);
 
         }
+    }
+    private void updateweatherpicture(ImageView imageview,String weather){
+        if(weather.trim().equals("暴雪"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_baoxue);
+        else if (weather.trim().equals("暴雨"))
+             imageview.setImageResource(R.drawable.biz_plugin_weather_baoyu);
+        else if(weather.trim().equals("大暴雨"))
+             imageview.setImageResource(R.drawable.biz_plugin_weather_dabaoyu);
+        else if(weather.trim().equals("大雪"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_daxue);
+        else if(weather.trim().equals("大雨"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_dayu);
+        else if(weather.trim().equals("多云"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_duoyun);
+        else if(weather.trim().equals("雷阵雨"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_leizhenyu);
+        else if(weather.trim().equals("雷阵雨冰雹"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_leizhenyubingbao);
+        else if(weather.trim().equals("晴"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_qing);
+        else if(weather.trim().equals("沙尘暴"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_shachenbao);
+        else if(weather.trim().equals("特大暴雨"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_tedabaoyu);
+        else if(weather.trim().equals("雾"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_wu);
+        else if(weather.trim().equals("小雪"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_xiaoxue);
+        else if(weather.trim().equals("小雨"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_xiaoyu);
+        else if(weather.trim().equals("阴"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_yin);
+        else if(weather.trim().equals("雨夹雪"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_yujiaxue);
+        else if(weather.trim().equals("阵雪"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_zhenxue);
+        else if(weather.trim().equals("阵雨"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_zhenyu);
+        else if(weather.trim().equals("中雪"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_zhongxue);
+        else if(weather.trim().equals("中雨"))
+            imageview.setImageResource(R.drawable.biz_plugin_weather_zhongyu);
+        else
+            imageview.setImageResource(R.drawable.biz_plugin_weather_qing);
+
+
+    }
+    private void updatepmpicture(ImageView imageview,String pmdata){
+        if (pmdata == null)
+        {
+            imageview.setImageResource(R.drawable.biz_plugin_weather_0_50);
+            return ;
+        }
+
+        int pmdatatmp = Integer.parseInt(pmdata);
+        if((pmdatatmp>=0 && pmdatatmp <=50 )||pmdatatmp < 0)
+             imageview.setImageResource(R.drawable.biz_plugin_weather_0_50);
+        else if(pmdatatmp<=100)
+            imageview.setImageResource(R.drawable.biz_plugin_weather_51_100);
+        else if(pmdatatmp<=150)
+            imageview.setImageResource(R.drawable.biz_plugin_weather_101_150);
+        else if(pmdatatmp<=200)
+            imageview.setImageResource(R.drawable.biz_plugin_weather_151_200);
+        else if(pmdatatmp<=300)
+            imageview.setImageResource(R.drawable.biz_plugin_weather_201_300);
+        else
+            imageview.setImageResource(R.drawable.biz_plugin_weather_greater_300);
+
+
+
+
+
+
     }
 }
 
