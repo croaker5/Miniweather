@@ -23,7 +23,7 @@ public class MyService extends Service {
             public void run() {
                try {
                    while (true) {
-                       Thread.sleep(1000000);
+                       Thread.sleep(6000);
                        sendBroadcast(intent);
 
 

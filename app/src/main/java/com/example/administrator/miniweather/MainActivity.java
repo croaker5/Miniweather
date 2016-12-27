@@ -320,8 +320,6 @@ public class MainActivity extends Activity implements View.OnClickListener , Vie
         }
         if(view.getId() == R.id.title_location){
 
-            Toast.makeText(MainActivity.this,"1",Toast.LENGTH_LONG).show();
-
             Log.d("mylocation",""+mLocationClient.isStarted());
 //            mLocationClient.requestLocation();
             currentlocation = mLocationClient.getLastKnownLocation();

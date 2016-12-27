@@ -28,16 +28,18 @@ public class LocalCity {
      * */
     public static String getCityIdByName(String name) {
         String cityId = null;
-        if(name.contains("市"))
-            name.replace("市","");
+        if(name != null) {
+            if (name.contains("市"))
+                name.replace("市", "");
 
 
-        int startIndex = LocalCity.cityIds.indexOf(name) + name.length() + 1;// 开始截取的位置
-        if (startIndex == -1) {
-            return null;
+            int startIndex = LocalCity.cityIds.indexOf(name) + name.length() + 1;// 开始截取的位置
+            if (startIndex == -1) {
+                return null;
+            }
+
+            cityId = LocalCity.cityIds.trim().substring(startIndex, startIndex + 9);
         }
-
-        cityId = LocalCity.cityIds.trim().substring(startIndex, startIndex + 9);
 
         return cityId;
     }

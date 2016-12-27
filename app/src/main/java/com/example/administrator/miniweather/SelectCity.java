@@ -30,6 +30,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Andrew on 2016/10/18.
@@ -54,10 +56,10 @@ public class SelectCity extends Activity implements View.OnClickListener {
 
     private final List <String> data= new ArrayList<>(); //用于存放城市名称
     private final List <String> cityID = new ArrayList<>();      //用于存放城市ID
-    private final List <String> dataforEdit = new ArrayList<>();
-    private final List <String> cityIDforEdit = new ArrayList<>();
-    private final List <String> cityallpyforEdit = new ArrayList<>();
-    private final List <String> cityfirstpyforEdit = new ArrayList<>();
+    private final List <String> data1 = new ArrayList<>();//用于存放城市名称备份
+    private final List <String> cityID1 = new ArrayList<>();//用于存放城市ID备份
+    private final List <String> cityallpy = new ArrayList<>();
+    private final List <String> cityfirstpy= new ArrayList<>();
 
     private ArrayAdapter <String> adapter2;
 
@@ -77,46 +79,23 @@ public class SelectCity extends Activity implements View.OnClickListener {
 
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-            dataforEdit.clear();
-            cityIDforEdit.clear();
-            String chartoStrtmp = new String(charSequence.toString());
-            Log.d("myapp","onTextChanged:"+chartoStrtmp);
-            String citynametmp;
-            if(chartoStrtmp != null) {
-                String strtmp;
-                edited = true;
-                Iterator<String> itforcityname = data.iterator();
-                while (itforcityname.hasNext()) {
-                    citynametmp = itforcityname.next();
-                    if(citynametmp.length()>=chartoStrtmp.length())
-                       strtmp = citynametmp.substring(0,chartoStrtmp.length());
-                    else
-                       continue;
-                    if(chartoStrtmp.equals(strtmp))
-                    {
-                        dataforEdit.add(citynametmp);
-                        cityIDforEdit.add(cityID.get(data.indexOf(citynametmp)));
-                    }
-                }
-                adapter2 = new ArrayAdapter<String>(mapplication1.getApplicationContext(),android.R.layout.simple_list_item_1
-                        ,dataforEdit);
-                adapter2.notifyDataSetChanged();
-                mlistView.setAdapter(adapter2);
-                mlistView.setCacheColorHint(Color.BLACK);
 
-            }
-            else
-            {
-                edited = false;
-                adapter2 = new ArrayAdapter<String>(mapplication1.getApplicationContext(),android.R.layout.simple_list_item_1
-                        ,data);
-                mlistView.setAdapter(adapter2);
-            }
-
-            Log.d("myapp", "onTextChanged:" + charSequence);
         }
         @Override
         public void afterTextChanged(Editable editable) {
+            if(editable != null) {
+                search(editable.toString());
+            }
+            else
+            {
+                data.clear();
+                cityID.clear();
+                data.addAll(data1);
+                cityID.addAll(cityID1);
+                adapter2.notifyDataSetChanged();
+
+            }
+
 
             Log.d("myapp","afterTextChanged:") ;
         }
@@ -139,12 +118,15 @@ public class SelectCity extends Activity implements View.OnClickListener {
             String cityname1 = tmp.getCity();
             String cityid1 = tmp.getNumber();
             String cityallpy1 = tmp.getAllPY();
-            String cityfirstpy1 = tmp.getFirstPY();
+            String cityfirstpy1 = tmp.getAllFristPY();
 
+            Log.d("pinyin",cityfirstpy1);
             data.add(cityname1);
+            data1.add(cityname1);
             cityID.add(cityid1);
-            cityallpyforEdit.add(cityallpy1);
-            cityfirstpyforEdit.add(cityfirstpy1);
+            cityID1.add(cityid1);
+            cityallpy.add(cityallpy1);
+            cityfirstpy.add(cityfirstpy1);
         }
         adapter2 = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1
         ,data);
@@ -153,20 +135,11 @@ public class SelectCity extends Activity implements View.OnClickListener {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                // Toast.makeText(SelectCity.this, "你单击了:"+i, Toast.LENGTH_SHORT).show();
-                if(edited==false) {
+
                     selectedID = cityID.get(i);
                     selectedCityname = data.get(i);
                     CurrentTitle = (TextView) findViewById(R.id.title_name);
                     CurrentTitle.setText("当前城市：" + selectedCityname);
-                }
-                else
-                {
-                    selectedID = cityIDforEdit.get(i);
-                    selectedCityname = dataforEdit.get(i);
-                    CurrentTitle = (TextView) findViewById(R.id.title_name);
-                    CurrentTitle.setText("当前城市：" + selectedCityname);
-                }
-
 
             }
         });
@@ -226,5 +199,49 @@ public class SelectCity extends Activity implements View.OnClickListener {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
+    }
+    public void search(String name){
+        data.clear();
+        cityID.clear();
+        if (name.length()==0)
+        {
+            data.addAll(data1);
+            cityID.addAll(cityID1);
+        }
+        else if(Character.isLetter(name.charAt(0))) {
+                name=name.toUpperCase();
+                Pattern pattern = Pattern.compile(name);
+                for (int i = 0; i < cityallpy.size(); i++) {
+                    Matcher matcher = pattern.matcher((String) cityallpy.get(i));
+                    if (matcher.find()) {
+                        data.add(data1.get(i));
+                        cityID.add(cityID1.get(i));
+                        Log.d("selectcity", data1.get(i));
+
+                    }
+
+                }
+                for (int i = 0; i < cityfirstpy.size(); i++) {
+                    Matcher matcher = pattern.matcher((String) cityfirstpy.get(i));
+                    if (matcher.find()) {
+                        data.add(data1.get(i));
+                        cityID.add(cityID1.get(i));
+                    }
+                }
+            }
+
+                Pattern pattern = Pattern.compile(name);
+
+                for (int i = 0; i < data1.size(); i++) {
+                    Matcher matcher = pattern.matcher((String) data1.get(i));
+                    if (matcher.find()) {
+                        data.add(data1.get(i));
+                        cityID.add(cityID1.get(i));
+                    }
+                }
+
+
+
+        adapter2.notifyDataSetChanged();
     }
 }
